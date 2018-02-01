@@ -26,6 +26,9 @@ MIT_WT_datafiles/country_names.csv
 #MIT_WT_datafiles/cntry_lat_lon_combined_fin_UTF8.csv	
 #MIT_WT_datafiles/cntry_lat_lon_combined_fin_UTF8.pickle		
 #MIT_WT_datafiles/products_sitc_rev2.tsv
+#
+# Out_figure files I no longer care to see.
+out_figures/adjacency_mats/*
 
 
 
