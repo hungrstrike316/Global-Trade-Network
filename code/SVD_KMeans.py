@@ -73,7 +73,7 @@ for i in range(0,len(conts)):
 
 
 # (4). Loop through, load and plot all previously saved adjacency matrix files.  
-years = np.array([1962]) #np.concatenate( (range(1962,1967),range(1969,2015)), axis=0) # years for which we have world trade data.
+years = np.concatenate( (range(1962,1967),range(1969,2015)), axis=0) # np.array([1962]) # years for which we have world trade data.
 #a1=263 # number of 'countries' in the data (but has 2 extra)
 #b=2 # get rid of 'world' and 'areas' from trade network
 
@@ -93,8 +93,8 @@ for y in years:
 		plt.imshow( np.log(trade_ntwrk), interpolation='none' )
 		plt.title( str('Global Trade Network in ' + str(y)) )
 		plt.colorbar(fraction=0.046, pad=0.04)
-		plt.xticks( range(0,a), countries.id_3char[0:a] )
-		plt.yticks( range(0,a), countries.id_3char[0:a] )
+		plt.xticks( range(0,num_countries), countries.id_3char[0:num_countries] )
+		plt.yticks( range(0,num_countries), countries.id_3char[0:num_countries] )
     
 		plt.subplot(2,2,3)
 		imprt = plt.plot( np.log(imports))#, label="import" )
@@ -103,7 +103,7 @@ for y in years:
 		plt.title("Import & Export for Individual Countries")
 		plt.ylabel("Log of Trade Value")
 		plt.xlabel("Country")
-		plt.xticks( range(0,a), countries.id_3char[0:a] )
+		plt.xticks( range(0,num_countries), countries.id_3char[0:num_countries] )
 		plt.legend(["Imports","Exports","Avg of I&E"])
     
 		plt.subplot(2,2,4)
@@ -111,10 +111,10 @@ for y in years:
 		plt.title("Difference between Import & Export")
 		plt.ylabel("Log Diff Trade Value")
 		plt.xlabel("Country")
-		plt.xticks( range(0,a), countries.id_3char[0:a] )
+		plt.xticks( range(0,num_countries), countries.id_3char[0:num_countries] )
 
 		fig.savefig(str( dirPre + 'out_figures/adjacency_mats/' + str(y) + '_boring.png' ),bbox_inches='tight')
-		plt.show()
+		#plt.show()
 		plt.close(fig)
 
 
@@ -125,73 +125,9 @@ for y in years:
 
 
 	# (5c). Compute Normalized Laplacian (For Asymmetric, use_out_degree can use imports or exports)
-	print(method)
-	if method=="Adjacency":
-		print()
-	elif method=="Normalized Laplacian":
-		trade_ntwrk = sp.csgraph.laplacian(trade_ntwrk, normed=True, use_out_degree=False)
-	elif method=="Modularity":
-		print(str( method + ' not Implemented yet' ) )
-	elif method=="Topographic Modularity":
-		print(str( method + ' not Implemented yet' ) )
-	else:
-		print(str( method + ' does not match any method I know of.' ) )
-
-	# (5b). Find Cuthill-McKee reordering of Adjacency Matrix (requires sparse matrices and scipy's sparse library).
-	# Q: Does it make sense to do this on Laplacian & Modularity? How do things change?
-	if True:
-		perm = nm.cuthill_mckee(trade_ntwrk)
-
-
-		# (5c). Plot Cuthill-Mckee reordering of Adjacency Matrix. 
-		if True:
-			fig = plt.figure(figsize=(15,15))
-		    
-		    # Plot Adjacency
-			plt.subplot(2,2,1)
-			plt.imshow( np.log10(trade_ntwrk), interpolation='none' )
-			plt.title(method)
-			#plt.colorbar(fraction=0.046, pad=0.04)
-			sm = plt.cm.ScalarMappable(cmap=plt.cm.jet)
-			sm._A = []
-			cbar = plt.colorbar(sm, ticks=[0, 1])
-			cbar.ax.set_yticklabels([pf.order_mag(np.min(trade_ntwrk)), pf.order_mag(np.max(trade_ntwrk))]) 
-		    
-		    
-		    # Plot reordered Adjacency
-			plt.subplot(2,2,2)
-			plt.imshow( np.log10(trade_ntwrk[perm][perm]), interpolation='none' )
-			plt.title("Cuthill-Mckee Reordering - THIS ORDERING IS NOT CORRECT HERE!!")
-			#plt.colorbar(fraction=0.046, pad=0.04)
-
-			sm = plt.cm.ScalarMappable(cmap=plt.cm.jet)
-			sm._A = []
-			cbar = plt.colorbar(sm, ticks=[0, 1])
-			cbar.ax.set_yticklabels([pf.order_mag(np.min(trade_ntwrk)), pf.order_mag(np.max(trade_ntwrk))]) 
-		    
-			#print("Reordered Countries")    
-			#print(countries.name[perm[0:40]])
-		    
-		    # Plot Imports and Exports reordered by Cuthill-Mckee algorithm
-			plt.subplot(2,2,3)
-			plt.plot(imports)
-			plt.plot(exports)
-			plt.title("Total Imports and Exports")
-		    #
-			plt.subplot(2,2,4)
-			plt.plot(imports[perm])
-			plt.plot(exports[perm])
-			plt.legend( ('imports','exports') )
-
-			fig.savefig(str( dirPre + 'out_figures/cuthill_mckee_reordering/' + method + '_' + str(y) + '_cuthill_mckee.png' ), bbox_inches='tight')
-			#plt.show()
-			plt.close(fig)
-
-
-
+	trade_ntwrk = nm.construct_ntwrk_method(trade_ntwrk,method)
 
 	
-
 
 
 	# (6). Compute Singular Value Decomposition on trade_ntwrkA (without anything on the diagonal)

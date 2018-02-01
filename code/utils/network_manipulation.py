@@ -62,3 +62,18 @@ def cuthill_mckee(trade_ntwrk):
 
 	perm = sp.csgraph.reverse_cuthill_mckee( sp.csc_matrix(trade_ntwrk),symmetric_mode=sym)
 	return perm
+
+
+def construct_ntwrk_method(trade_ntwrk,method):
+	if method=="Adjacency":
+		print()
+	elif method=="Normalized Laplacian":
+		trade_ntwrk = sp.csgraph.laplacian(trade_ntwrk, normed=True, use_out_degree=False)
+	elif method=="Modularity":
+		print(str( method + ' not Implemented yet' ) )
+	elif method=="Topographic Modularity":
+		print(str( method + ' not Implemented yet' ) )
+	else:
+		print(str( method + ' does not match any method I know of.' ) )	
+
+	return trade_ntwrk	

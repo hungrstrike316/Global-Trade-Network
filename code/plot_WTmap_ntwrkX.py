@@ -123,16 +123,15 @@ for y in years:
 
 
 
-
-
-
 	#------------------------------------------------------------------------------------------------------------
 	# (6). Imshow and save figure of Adjacency Matrix - another way to visualize changes in network
 	#
 	#
-	if(True):
+	if(False):
 
-		trade_ntwrkA = dm.load_adjacency_npz_year(str( dirPre + 'adjacency_ntwrk_npz_files/'), y, num_countries+2)
+		trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(str( dirPre + 'adjacency_ntwrk_npz_files/'), y, num_countries+2)
+		#trade_ntwrkA = out[0]
+
 
 		figA = plt.figure(figsize=(15,15))
 		plt.imshow(np.log10(trade_ntwrkA))
@@ -142,5 +141,5 @@ for y in years:
 
 		figA.savefig(str( dirPre + 'out_figures/adjacency_mats/' + str(y) + '_adj_mat.png' ))
 
-		plt.show()
-		#plt.close(figA)
+		#plt.show()
+		plt.close(figA)
