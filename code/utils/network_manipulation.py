@@ -75,3 +75,32 @@ def construct_ntwrk_method(trade_ntwrk, method):
         print(str(method + ' does not match any method I know of.'))
 
     return trade_ntwrk
+
+
+def modularity(adjacency, return_symmetric=False):
+    """Returns modularity matrix of a directed graph. If A is the adjacency
+    matrix of a directed graph, then the modularity matrix B is given by B_ij =
+    A_ij - (in_degree_i * out_degree_j)/(total degree of network)
+
+    See 'Leicht, E. A., & Newman, M. E. (2008). Community structure in directed networks.
+    Physical review letters, 100(11), 118703'
+
+    Parameters
+    ----------
+    adjacency : NumPy array_like
+        Adjacency matrix of graph
+    return_symmetric : boolean
+        Boolean flag that specifies whether to return undirected modularity or
+        symmetricized undirected modularity, defaults to False. See Returns.
+    Returns
+    -------
+    ndarray
+        If return_symmetric is True, returns B + B', otherwise returns B.
+
+    """
+    in_degree = np.sum(adjacency, axis=0)
+    out_degree = np.sum(adjacency, axis=1)
+    B = adjacency - (np.multiply.outer(in_degree, out_degree)) / np.sum(adjacency)
+    if return_symmetric:
+        return B + B.T
+    return B
