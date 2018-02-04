@@ -11,6 +11,7 @@
 # Import a bunch of python packages that I use below.
 import numpy as np
 import pandas as pd
+import sys
 import networkx as nx
 import utils.data_manipulation as dm # utils is a package I am putting together of useful functions
 
@@ -36,7 +37,7 @@ def Construct_WTnet_Modularity(year):
 	except:
 		num_countries = 263 # hard coded if countries vector has not been loaded in.
 
-
+	year
 	## (4) First the adjacency matrix is loaded from the adj_npz.
 	# Then the adj_matrix is converted into a NetworkX DiGraph object.
 	# Finally the DiGraph is used to create a modularity matrix, using the built in NetworkX
