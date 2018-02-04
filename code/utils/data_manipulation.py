@@ -24,7 +24,7 @@ def set_dir_tree():
 
 def load_countries(dirPre):
 	# (1). Load in country names & ids from a tsv file on MIT dataset.
-	fcountries = str(dirPre + 'MIT_WT_datafiles/country_names.tsv')	
+	fcountries = str(dirPre + 'MIT_WT_datafiles/country_names.tsv')
 	countries = pd.read_table(fcountries, sep='\t')
 	return countries
 
@@ -33,7 +33,7 @@ def load_countries(dirPre):
 
 def load_products(dirPre):
 	# (2). Load in product list from a tsv file on MIT dataset.
-	fgoods = str(dirPre + 'MIT_WT_datafiles/products_sitc_rev2.tsv')	
+	fgoods = str(dirPre + 'MIT_WT_datafiles/products_sitc_rev2.tsv')
 	goods = pd.read_table(fgoods, sep='\t')
 	return goods
 
@@ -67,27 +67,27 @@ def construct_adjacency_from_year_origin_destination_csv(dirIn, dirOut, fileTag,
 
 	trade_ntwrkImp = np.zeros( (num_countries, num_countries) )
 	#trade_ntwrkExp = np.zeros( (num_countries, num_countries) )
-	
+
 	tradeCountry_import = np.zeros( num_countries )
 	tradeCountry_export = np.zeros( num_countries )
 
 	ftradeYr = str(dirIn + 'yr' + str(year) + fileTag)
 	tradeYr = pd.read_table(ftradeYr, sep='\t')
 	print( 'year = ' + str(year) )
-			
+
 	for o in range(0, num_countries):
 		iO = tradeYr['origin'].str.strip() == countries.id_3char[o]
 		tradeCountry_import[o] = ( np.sum(tradeYr[iO].import_val) )
 		tradeCountry_export[o] = ( np.sum(tradeYr[iO].export_val) )
 		print([ str(o) + " / " + str(a) + " : " + countries.id_3char[o] ])
-				
+
 		for d in range(0, num_countries):
 			iD = tradeYr['dest'].str.strip() == countries.id_3char[d]
 			#trade_ntwrkExp[o,d] = ( np.sum(tradeYr[iO & iD].export_val) )
 			trade_ntwrkImp[o,d] = ( np.sum(tradeYr[iO & iD].import_val) )
-			
+
 	# Save a file with the adjacency matrix (trade_ntwrkImp), the total import (tradeCountry_import) and export of each country (tradeCountry_export):
-	np.savez(str(dirOut + 'adjacency_ntwrk_' + str(years) + '_' + str(num_countries) + 'countries.npz'), 
+	np.savez(str(dirOut + 'adjacency_ntwrk_' + str(years) + '_' + str(num_countries) + 'countries.npz'),
 		netwrk = trade_ntwrkImp, imprt = tradeCountry_import, exprt = tradeCountry_export)
 
 
@@ -108,11 +108,18 @@ def load_adjacency_npz_year(dirIn, year, num_countries):
 	#
 	return trade_ntwrkA, tradeCountry_import, tradeCountry_export
 
+def load_modularity_npz_year(dirIn, year, num_countries):
+	# (5). Load a previously saved modularity matrix files:
+	loaded = np.load(str(dirIn + 'modularity_ntwrk_' + str(year) + '_' + str(num_countries) + 'countries.npz'))
+	trade_ntwrkA = loaded['netwrk']
+	loaded.close()
+
+	return trade_ntwrkA
 
 
 def load_lat_lon_pickle(file):
 	with open( file, 'rb') as handle:
 		lat_lon = pickle.load(handle)
 	lat_lon.pop()
-	lat_lon.pop() # pop twice to get rid of world & areas	
+	lat_lon.pop() # pop twice to get rid of world & areas
 	return lat_lon
