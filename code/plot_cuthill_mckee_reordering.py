@@ -48,8 +48,8 @@ dirPre = dm.set_dir_tree()
 
 #------------------------------------------------------------------------------------------------------------
 ## (1). Load country names that align with 3 letter acronyms used in origin destination file
-countries = dm.load_countries(dirPre)
-num_countries = np.size(countries,0)-2 # get rid of 'world' and 'areas'
+countriesLL = dm.load_country_lat_lon_csv(dirPre)
+num_countries = countriesLL.shape[0]
 
 
 
@@ -61,15 +61,19 @@ num_countries = np.size(countries,0)-2 # get rid of 'world' and 'areas'
 
 
 # (4). Loop through, load and plot all previously saved adjacency matrix files.  
-years = np.concatenate( (range(1962,1967),range(1969,2015)), axis=0) # np.array([1962]) # years for which we have world trade data.
-#a1=263 # number of 'countries' in the data (but has 2 extra)
-#b=2 # get rid of 'world' and 'areas' from trade network
+years = range(1962,2015) # np.array([1962]) # years for which we have world trade data.
 
 for y in years:
 	print(y)
 
 	dirIn = str( dirPre + 'adjacency_ntwrk_npz_files/' )
-	trade_ntwrk, imports, exports = dm.load_adjacency_npz_year(dirIn, y, num_countries+2)
+	try:
+		trade_ntwrk, imports, exports = dm.load_adjacency_npz_year(dirIn, y, num_countries)
+	except:
+		print('Can not find adjacency file')
+		continue
+
+	
 
 	# (4). Check that Imports are just the column sums and Exports are row sums
 	assert np.any( np.sum(trade_ntwrk,axis=0) == imports) , 'Imports are Weird'
@@ -114,7 +118,7 @@ for y in years:
 			cbar.ax.set_yticklabels([pf.order_mag(np.min(trade_ntwrk)), pf.order_mag(np.max(trade_ntwrk))]) 
 		    
 			#print("Reordered Countries")    
-			#print(countries.name[perm[0:40]])
+			#print(countriesLL.name[perm[0:40]])
 		    
 		    # Plot Imports and Exports reordered by Cuthill-Mckee algorithm
 			plt.subplot(2,2,3)

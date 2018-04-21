@@ -7,18 +7,10 @@ import utils.plot_functions as pf
 import utils.data_manipulation as dm
 import utils.network_manipulation as nm
 
+from ast import literal_eval # to evaluate what is in a string literally.
 
-
-"""
-
-import pandas as pd
-
-import time
-import os
-import csv
-
-import sys
-"""
+flg_plot_graph_on_map = True
+flg_imshow_adjacency  = True
 
 
 #LOOK UP: from VS260C Rowland Taylor Lecture.
@@ -36,11 +28,15 @@ dirPre = dm.set_dir_tree()
 
 
 ### Loop over each year - # For each year: Each trade network from years 1962 - 2014.
-years =  np.concatenate( (range(1962,1967), range(1969,2015) ), axis=0) # np.array([1965]) #
+years =  range(1962,2015)
 for y in years:
 	print(str(y))
 
-	trade_ntwrkG = nx.read_gpickle( str( dirPre + 'adjacency_ntwrkX_pickle_files/trade_ntwrkX_'+ str(y) + '.gpickle' ) )
+	try:
+		trade_ntwrkG = nx.read_gpickle( str( dirPre + 'adjacency_ntwrkX_pickle_files/trade_ntwrkX_'+ str(y) + '.gpickle' ) )
+	except:
+		print('Can not find gpickle file')
+		continue
 
 	# extrace node attributes for plotting
 	LatLon = nx.get_node_attributes(trade_ntwrkG,'LatLon')            # these output dicts containing tuples of [(key, value)].
@@ -63,9 +59,13 @@ for y in years:
 		cntr=cntr+1
 
 	# list comprehensions to extract node attributes from dicts.
-	LatLon = [val for key, val in LatLon.items()] 
-	exports = [val for key, val in exports.items()]
-	imports = [val for key, val in imports.items()]
+	LatLon = [literal_eval(val) for key, val in LatLon.items()] 
+	exports = [literal_eval(val) for key, val in exports.items()]
+	imports = [literal_eval(val) for key, val in imports.items()]
+	#
+	imports = np.array(imports)
+	exports = np.array(exports)
+	#
 	#continent = [val for key, val in continent.items()] 
 	#countryId3 = [val for key, val in countryId3.items()]
 	#countryName = [val for key, val in countryName.items()]
@@ -75,15 +75,15 @@ for y in years:
 	# (5). Plot and save figure of graph in networkX (with nodes in relative geographic location, 
 	#      labels for names, importd & exports for size.
 	#
-	if(False):
-		#%matplotlib inline
+	if flg_plot_graph_on_map:
+
 		figG = plt.figure(figsize=(15,9))
 
 		nSize = exports     # could also be imports OR mean(imports,exports)
 		nSize = 1000*(nSize / np.max(nSize))
 
 		# Set up vector of log of relative size of edges for colormap and edge thickness in trade map plot
-		nWidth = [(trade_ntwrkG[u][v]["weight"]) for u,v in trade_ntwrkG.edges()]
+		nWidth = [literal_eval(trade_ntwrkG[u][v]["weight"]) for u,v in trade_ntwrkG.edges()]
 		nWidth = np.asarray(nWidth)
 		nz = np.rot90(np.nonzero(nWidth)) # a tuple of x & y location of each nonzero value in Adjacency matrix
 		low = np.min(nWidth[nz])
@@ -127,9 +127,9 @@ for y in years:
 	# (6). Imshow and save figure of Adjacency Matrix - another way to visualize changes in network
 	#
 	#
-	if(False):
+	if flg_imshow_adjacency:
 
-		trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(str( dirPre + 'adjacency_ntwrk_npz_files/'), y, num_countries+2)
+		trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(str( dirPre + 'adjacency_ntwrk_npz_files/'), y, num_countries)
 		#trade_ntwrkA = out[0]
 
 

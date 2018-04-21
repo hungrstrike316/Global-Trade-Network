@@ -17,15 +17,20 @@
 import numpy as np
 import pandas as pd
 import utils.data_manipulation as dm # utils is a package I am putting together of useful functions	
+import sys
 
 
 # Define the function to construct a trade network adjacency matrix for single year. Run this in a for loop below
 def Construct_WTnet_Adjacency(year):	
 
+	# print( sys.argv )
+	# print( sys.argv[0] )
+	# print( sys.argv[1] )
+
 	dirPre = dm.set_dir_tree()
 
 	## (1) Load country names that align with 3 letter acronyms used in origin destination file
-	countries = dm.load_countries(dirPre)
+	countriesLL = dm.load_country_lat_lon_csv(dirPre)
 	
 	## (2) Load in names and codes for types of goods traded
 	# goods = dm.load_products(dirPre)
@@ -40,7 +45,7 @@ def Construct_WTnet_Adjacency(year):
 		dirOut = str(dirPre + 'origin_destination_csvs_byYear/')
 		file = 'year_origin_destination_sitc_rev2.tsv'
 		#
-		extract_year_from_origin_destination_csv(dirIn, dirOut, file)
+		dm.extract_year_from_origin_destination_csv(dirIn, dirOut, file)
 
 
 	## (4) Construct directed network (in an Adjacency matrix form) that shows goods shipped to and from each pair of
@@ -57,12 +62,14 @@ def Construct_WTnet_Adjacency(year):
 		#year = {This Variable Passed into Construct_WTnet_Adjacency function}
 		#year = range(1962,2014) # this is input into function now as sys.argv[0] !
 		#
-		try:
-			num_countries = np.size(countries,0)
-		except:
-			num_countries = 263 # hard coded if countries vector has not been loaded in.
+		# try:
+		# 	num_countries = np.size(countries,0)
+		# except:
+		# 	num_countries = 261 # hard coded if countries vector has not been loaded in.
+
+		# print(countries)	
 		#
-		construct_adjacency_matrix_from_year_origin_destination_csv(dirIn, dirOut, fileTag, year, num_countries)
+		dm.construct_adjacency_from_year_origin_destination_csv(dirIn, dirOut, fileTag, year, countriesLL)
 
 
 # This bit here makes it so you can call this as a function from the command line with the year as an input argument.
@@ -71,5 +78,5 @@ def Construct_WTnet_Adjacency(year):
 # On cluster you may have to load python module first, like:
 # 	>> module load python/anaconda3
 if __name__ == "__main__":
-	Construct_WTnet_Adjacency(sys.argv[1:4]) # this counts on the input being only 4 characters, a year - like '1984'.
+	Construct_WTnet_Adjacency(sys.argv[1]) #[1:4] this counts on the input being only 4 characters, a year - like '1984'.
 

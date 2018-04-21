@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def draw_map():
-    #  Basemap figure, draws costlines of continents under network.
+    ##  (1). Basemap figure, draws costlines of continents under network.
     #  Call map1.draw__ before plt.save or plt.draw to draw network on map.
     map1 = Basemap(projection='cyl')
     map1.drawmapboundary(fill_color='white')
@@ -12,8 +12,13 @@ def draw_map():
     map1.drawcountries()
 
 
+
+# -------------------------------- # -------------------------------- # --------------------------------
+    
+
+
 def plot_labels(H, tit, xlab, ylab, szfont):
-    # Add title, axis labels, and adjust font size for figure.
+    ## (2). Add title, axis labels, and adjust font size for figure in standard-ish format.
     plt.ylabel(ylab, fontsize=szfont)
     plt.xlabel(xlab, fontsize=szfont)
     plt.title(tit, fontsize=szfont)
@@ -22,7 +27,13 @@ def plot_labels(H, tit, xlab, ylab, szfont):
     return H
 
 
+
+# -------------------------------- # -------------------------------- # --------------------------------
+
+
+
 def order_mag(x):
+	## (3). Replace long numbers with many zeros with shorthand notation - for axis or colorbar labeling.
     tag = ['', 'k', 'M', 'B', 'T']  # thousand, million, billion, trillion
     cntr = 0
     while x/1000 > 1:

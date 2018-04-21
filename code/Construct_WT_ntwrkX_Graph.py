@@ -15,26 +15,25 @@ dirPre = dm.set_dir_tree()
 
 #------------------------------------------------------------------------------------------------------------
 ## (1). Load country names that align with 3 letter acronyms used in origin destination file
-countries = dm.load_countries(dirPre)
-num_countries = np.size(countries,0)
-
-## (2) Load in names and codes for types of goods traded
-#goods = dm.load_products(dirPre)
+countries = dm.load_country_lat_lon_csv(dirPre)
+num_countries = countries.shape[0]
 
 ### Loop over each year
-years = np.concatenate( (range(1962,1967), range(1969,2015) )  , axis=0)
+years = range(1962,2015)
 
-a=num_countries          # number of countries (other 2 are 'world' and 'areas')
+flg_symNet = True
 
 # For each year: Each trade network from years 1962 - 2014.
-for y in years:
-	print(str(y))
-
-	# load in adjacency for a given year.
+for year in years:
+	print(str(year))
 	dirIn = str( dirPre + 'adjacency_ntwrk_npz_files/' )
-	trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(dirIn, y, num_countries)
+	try:
+		# load in adjacency for a given year.
+		trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(dirIn, year, num_countries, flg_symNet)
+	except:
+		print('Adjacency File not found.')
+		continue
+
 
 	# Construct a networkX graph containing node and edge attributes.
-	lat_lon_in = str(dirPre + 'MIT_WT_datafiles/cntry_lat_lon_combined_fin_UTF8.pickle') # must be a pickle file.
-	dirOut_ntwrkX = str(dirPre + 'adjacency_ntwrkX_pickle_files/') # directory to save networkX pickle file of Trade Net 
-	trade_ntwrkG = nm.construct_ntwrkX_Graph( lat_lon_in, trade_ntwrkA, imports, exports, dirOut_ntwrkX, y )
+	trade_ntwrkG = nm.construct_ntwrkX_Graph( trade_ntwrkA, imports, exports, dirPre, year, flg_symNet )	

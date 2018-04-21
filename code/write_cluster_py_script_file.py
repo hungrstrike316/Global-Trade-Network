@@ -8,8 +8,8 @@ def print_single_script_file(inpt,fileID):
 	fileID.write('# Partition:\n')
 	fileID.write('#SBATCH --partition=cortex\n')
 	fileID.write('#\n')
-	fileID.write('# Constrain Nodes:\n')
-	fileID.write('#SBATCH --constraint=cortex_nogpu\n')
+	#fileID.write('# Constrain Nodes:\n')
+	#fileID.write('#SBATCH --constraint=cortex_nogpu\n')
 	fileID.write('#\n')
 	fileID.write('# Processors:\n')
 	fileID.write('#SBATCH --ntasks=4\n')
@@ -21,13 +21,14 @@ def print_single_script_file(inpt,fileID):
 	fileID.write('#SBATCH --time=48:0:00\n')
 	fileID.write('#\n')
 	fileID.write('#\n')
-	fileID.write('#SBATCH -o net.out\n')
-	fileID.write('#\n')
-	fileID.write('#SBATCH -e net.err\n')
-	fileID.write('\n')
+	# fileID.write('#SBATCH -o net.out\n')
+	# fileID.write('#\n')
+	# fileID.write('#SBATCH -e net.err\n')
+	# fileID.write('\n')
 	fileID.write('cd ../code\n')
 	fileID.write('\n')
-	fileID.write('module load python/anaconda3\n')
+	#fileID.write('module load python/anaconda3\n')
+	fileID.write('module load python/3.5\n')
 	fileID.write('\n')
 	fileID.write( str('python Construct_WTnet_Adjacency.py ' + str(inpt) + '\n') )
 	fileID.write('\n')
@@ -36,7 +37,7 @@ def print_single_script_file(inpt,fileID):
 
 
 
-years = range(1967,1969) # loop over years. (1962,2015) = total
+years = range(2008,2010) #range(1962,2015) # = total
 fidW = open('../scripts4cluster/run_all_Construct_WTnet_Adjacency', 'w' ) 						      # wrapper script file
 fidW.write( str('# Note: Should be sitting in scripts4cluster directory. \n') )
 fidW.write( str('# Note: Should run chmod 777 first before runnning. \n') )
