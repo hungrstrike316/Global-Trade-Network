@@ -42,9 +42,11 @@ flg_symmetric_network = True # Network is made undirected if true. Otherwise it 
 #
 
 
+
+
 #method = 'Adjacency'
-method = 'NormLaplacian'
-#method = 'Modularity'
+#method = 'NormLaplacian'
+method = 'Modularity'
 #method = 'TopoModularity'
 
 
@@ -86,7 +88,7 @@ else:
 
 
 # (4). Loop through, load and plot all previously saved adjacency matrix files.  
-years =  range(1962,2015) # years for which we have world trade data.
+years =  range(1962,1963) # years for which we have world trade data. range(1962,2015)
 
 for y in years:
 	print(y)

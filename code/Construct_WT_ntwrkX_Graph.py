@@ -21,19 +21,11 @@ num_countries = countries.shape[0]
 ### Loop over each year
 years = range(1962,2015)
 
-flg_symNet = True
+flg_sym = False
 
 # For each year: Each trade network from years 1962 - 2014.
 for year in years:
 	print(str(year))
-	dirIn = str( dirPre + 'adjacency_ntwrk_npz_files/' )
-	try:
-		# load in adjacency for a given year.
-		trade_ntwrkA, imports, exports = dm.load_adjacency_npz_year(dirIn, year, num_countries, flg_symNet)
-	except:
-		print('Adjacency File not found.')
-		continue
-
 
 	# Construct a networkX graph containing node and edge attributes.
-	trade_ntwrkG = nm.construct_ntwrkX_Graph( trade_ntwrkA, imports, exports, dirPre, year, flg_symNet )	
+	trade_ntwrkG = nm.construct_ntwrkX_Graph( dirPre, year, flg_sym )	

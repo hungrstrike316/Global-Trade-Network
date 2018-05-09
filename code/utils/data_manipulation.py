@@ -137,6 +137,11 @@ def load_adjacency_npz_year(dirIn, year, num_countries, flg_sym):
 		imports = IE_avg
 		exports = IE_avg
 	#
+	# output results as integers
+	trade_ntwrk = trade_ntwrk.astype(int)
+	imports =  imports.astype(int)
+	exports =  exports.astype(int)
+	#
 	return trade_ntwrk, imports, exports
 
 
