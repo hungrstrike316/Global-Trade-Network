@@ -14,7 +14,7 @@ def draw_map():
 
 
 # -------------------------------- # -------------------------------- # --------------------------------
-    
+
 
 
 def plot_labels(H, tit, xlab, ylab, szfont):
@@ -40,3 +40,22 @@ def order_mag(x):
         cntr = cntr+1
         x = x//1000
     return str('$' + str(x) + ' ' + tag[cntr])
+
+# -------------------------------- # -------------------------------- # --------------------------------
+
+
+
+def axis_labels(axis, tit, xlab, ylab, xtick=None, xticklab=None, ytick=None, yticklab=None, szfont=12, titfont=12, grid=False):
+    ## (4). Add title, axis labels and ticks for axis objects.
+    # title and axis lable size separable parameters, set to matplotlib default; grid defualt to False
+    axis.set_xlabel(xlab, fontsize=szfont)
+    axis.set_ylabel(ylab, fontsize=szfont)
+    axis.set_title(tit, fontsize=titfont)
+    if xticklab and xtick:
+        axis.set_xticks(xtick)
+        axis.set_xticklabels(xticklab)
+    if yticklab and xtick:
+        axis.set_yticks(ytick)
+        axis.set_yticklabels(yticklab)
+    if grid:
+        axis.grid()
