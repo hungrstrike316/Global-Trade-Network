@@ -22,20 +22,19 @@ getcontext().prec = 3  # later used for adjusting alpha in scatter plot
 # baden Nature 2016 529. imaging retina
 
 
-# This script Construct directed network Graph object that NetworkX can analyze from the Adjacency matrix
-# loaded from an .npz file. It will save the graph object as a .gpickle file. It will also save output
-# figures of the Adjacency Matrix, and the network overlayed on a map.
+# This script clusters the network graph and
+# displays the clusters overlayed on a map.
 
 #------------------------------------------------------------------------------------------------------------
 ## (0). Check what Operating System you are on (either my machine or Cortex cluster) and adjust directory structure accordingly.
 dirPre = dm.set_dir_tree()
 
-for file_year in np.arange(1962, 1963):
+for file_year in np.arange(2005, 2015):
 	try:
 	    year = np.array(file_year)
 	    flg_sym = True
 	    trade_ntwrkG = nm.construct_ntwrkX_Graph(dirPre=dirPre, year=year, flg_sym=flg_sym)
-	    # giant = max(nx.connected_component_subgraphs(G), key=len)
+	    giant = max(nx.connected_component_subgraphs(trade_ntwrkG), key=len)
 	    # out_deg = len(list(G)) - len(giant)
 	except:
 	    pass
@@ -43,14 +42,13 @@ for file_year in np.arange(1962, 1963):
 
 	part = c.best_partition(trade_ntwrkG, partition=None, weight='weight', resolution=res, randomize=False)
 	res_counts = Counter(part.values())
-	res_order = sorted(res_counts, key=lambda i: int(res_counts[i]))
+	res_order = sorted(res_counts, key=lambda i: int(res_counts[i]), reverse=True)
 	partition_sizes = Counter(res_counts.values())
-	lg_clust = [key for key, val in res_counts.items() if val == max(list(res_counts.values()))][0]
-
-	clust_node_dict = {str(res_order[-idx]):[key for key,val in part.items() if
-						val == res_order[-idx]] for idx in np.arange(1,len(res_order))
-						if res_counts[res_order[-idx]] > 1}
-
+	# lg_clust = [key for key, val in res_counts.items() if val == max(list(res_counts.values()))][0]
+	dc_nodes = set([node for node in trade_ntwrkG.nodes() if node not in list(giant)])
+	clust_node_dict = {str(res_order[idx]):[key for key,val in part.items() if
+						val == res_order[idx]] for idx in np.arange(len(res_order))
+						if res_counts[res_order[idx]] > 1}
 	ones_clusters = set([key for key,val in res_counts.items() if val == 1])
 	ones_nodes = set([key for key,val in part.items() if val in ones_clusters])
 	# extract node attributes for plotting
@@ -64,34 +62,43 @@ for file_year in np.arange(1962, 1963):
 	num_clusters = len(partition_sizes)
 	ones_LatLon = np.array([val for key, val in LatLon.items() if key in ones_nodes])
 	clust_LatLon = {k:np.array([val for key, val in LatLon.items() if key in v]) for k,v in clust_node_dict.items()}
+	dc_LatLon = np.array([val for key,val in LatLon.items() if key in dc_nodes])
 
-	inc = Decimal(0.2)
-	alpha = Decimal(0.9)
-	alphas = {}
-	for idx in res_order[:-num_clusters:-1]:
-		alphas[str(idx)] = float(alpha)
-		alpha -= inc
+	# inc = Decimal(0.2)
+	# alpha = Decimal(0.9)
+	# alphas = {}
+	# colors = list(plt.rcParams['axes.prop_cycle'])
+	# print(colors)
+	colors = ['g','r','m','b','c']
+	color_dict = {}
+	label_dict = {}
+	for idx in res_order[:num_clusters-1]:
+		color_dict[str(idx)] = colors[idx]
+		label_dict[str(idx)] = str(len(clust_node_dict[str(idx)])) + ' nodes'
+	# print(clust_node_dict.keys())
+	# print(res_order[:num_clusters-1], num_clusters)
 
 # #------------------------------------------------------------------------------------------------------------
-# # (5). Plot and save figure of graph in networkX (with nodes in relative geographic location,
-# #      labels for names, importd & exports for size.
+# (5). Plot and save figure of graph in networkX (with nodes in relative geographic location,
+#      labels for names, importd & exports for size.
 	figG = plt.figure(figsize=(15,9))
 	map1 = Basemap(projection='cyl')
 	pf.draw_map()
 
+	map1.scatter(ones_LatLon[:,0], ones_LatLon[:,1], marker='o', color='grey', alpha=0.9)
+	map1.scatter(dc_LatLon[:,0], dc_LatLon[:,1], marker='x', color='k', alpha=0.9, label= str(len(dc_nodes)) + ' Disconnected')
+
 	for key,val in clust_LatLon.items():
-		map1.scatter(val[:,0], val[:,1], marker= 'o', color='r', alpha=alphas[key])
-	map1.scatter(ones_LatLon[:,0], ones_LatLon[:,1], marker='o', color='grey')
+		map1.scatter(val[:,0], val[:,1],  marker= 'o', color=color_dict[key], alpha=0.9, label=label_dict[key])
 	plt.title("GTN Clustering Map " + str(file_year))
 	plt.xlim(-180, +180)
 	plt.ylim(-90,+90)
+	plt.legend(loc='best')
 	plt.show()
 
 
-
-	#
-	figG.savefig(str( '../out_figures/GTN_clust_maps/' + str(file_year) + '_clust_map.png' ), bbox_inches='tight')
-
+#
+#
+	# figG.savefig(str( '../out_figures/GTN_clust_maps/' + str(file_year) + '_clust_map.png' ), bbox_inches='tight')
+#
 	plt.close(figG)
-	#
-	#
