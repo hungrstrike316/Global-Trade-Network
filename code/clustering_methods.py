@@ -1,6 +1,6 @@
 # This script will use community detection algorithms from networkx.community module
 # (and maybe other modules too) to find communities in the Global Trade Network data.
-# 
+#
 
 
 # (0). Import packages and libraries
@@ -133,11 +133,11 @@ if False:
 
 
 #------------------------------------------------------------------------------------------------------------
-# Explore networkx's community partitioning 
+# Explore networkx's community partitioning
 
 # # # # # # CONSTRUCTING GRAPHS WITH COMMUNITY STRUCTURE TO TEST ALGORITHMS
 #
-# (1). LFR_benchmark_graph - construct graph for testing community detection algorithms. Define degree distributions, 
+# (1). LFR_benchmark_graph - construct graph for testing community detection algorithms. Define degree distributions,
 # 						community size distributions, strength of edges in graph and in communities.
 #
 # (2). nx.community.community_generators. - whole library of generators for graphs with community structure
@@ -149,7 +149,7 @@ if False:
 #
 # (1). kernighan_lin_bisection - algorithm iteratively swaps pairs of nodes to reduce the edge cut between the two sets.
 #
-# (2). asyn_fluidc - asynchronous fluid communities algorithm (k = # communities to find) 
+# (2). asyn_fluidc - asynchronous fluid communities algorithm (k = # communities to find)
 #					Note: have to find Giant Connected Component first.
 #		part = nx.community.asyn_fluidc(G, k=5, max_iter=100)
 #
@@ -161,7 +161,7 @@ if False:
 # 		def heaviest(G):
 # 			u, v, w = max(G.edges(data='weight'), key=itemgetter(2))
 # 			return (u, v)
-#	
+#
 # 		comp = girvan_newman(G, most_valuable_edge=heaviest)
 # 		tuple(sorted(c) for c in next(comp))
 #
@@ -194,10 +194,10 @@ if False:
 #
 # (6).	nx.community.quality.inter_community_non_edges
 
-      
 
 
-# # OTHER NETWORKX STUFF THAT WILL BE USEFUL 
+
+# # OTHER NETWORKX STUFF THAT WILL BE USEFUL
 # nx.fruchterman_reingold_layout - nice density based graph visualization.
 
 
@@ -465,26 +465,26 @@ if False:
 # nx.edge_connectivity                                nx.multi_source_dijkstra_path                       nx.write_sparse6
 # nx.edge_current_flow_betweenness_centrality         nx.multi_source_dijkstra_path_length                nx.write_weighted_edgelist
 # nx.edge_current_flow_betweenness_centrality_subset  nx.multidigraph                                     nx.write_yaml
-# nx.edge_dfs                                         nx.multigraph                                       
+# nx.edge_dfs                                         nx.multigraph
 
 
 
 
 #------------------------------------------------------------------------------------------------------------
-# Explore scikit-learn clustering module 
+# Explore scikit-learn clustering module
 
 
 # skc.AffinityPropagation      skc.MeanShift                skc.affinity_propagation_    skc.get_bin_seeds            skc.mean_shift_
 # skc.AgglomerativeClustering  skc.MiniBatchKMeans          skc.bicluster                skc.hierarchical             skc.spectral
 # skc.Birch                    skc.SpectralBiclustering     skc.birch                    skc.k_means                  skc.spectral_clustering
 # skc.DBSCAN                   skc.SpectralClustering       skc.dbscan                   skc.k_means_                 skc.ward_tree
-# skc.FeatureAgglomeration     skc.SpectralCoclustering     skc.dbscan_                  skc.linkage_tree             
-# skc.KMeans                   skc.affinity_propagation     skc.estimate_bandwidth       skc.mean_shift   
+# skc.FeatureAgglomeration     skc.SpectralCoclustering     skc.dbscan_                  skc.linkage_tree
+# skc.KMeans                   skc.affinity_propagation     skc.estimate_bandwidth       skc.mean_shift
 
 
 
 #------------------------------------------------------------------------------------------------------------
-# Explore scikit-learn clustering metrics module 
+# Explore scikit-learn clustering metrics module
 
 
 # skm.SCORERS                                skm.fbeta_score                            skm.pairwise_distances
@@ -506,7 +506,7 @@ if False:
 # skm.coverage_error                         skm.median_absolute_error                  skm.silhouette_score
 # skm.euclidean_distances                    skm.mutual_info_score                      skm.v_measure_score
 # skm.explained_variance_score               skm.normalized_mutual_info_score           skm.zero_one_loss
-# skm.f1_score                               skm.pairwise                               
+# skm.f1_score                               skm.pairwise
 
 
 
