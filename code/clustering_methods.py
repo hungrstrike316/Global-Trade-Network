@@ -62,6 +62,15 @@ for i,r in enumerate(res):
 	dend = c.generate_dendrogram(G, part_init=None, weight='weight', resolution=r, randomize=False)
 	print('Tree depth is ',len(dend))
 	#
+
+
+	# part_list = [part.get(x) for x in part]
+
+	# for j in range()
+	# dend_list = [part.get(x) for x in dend[depth]]
+
+
+	#
 	# (2). compute partition quality metrics
 	# 		(a). 'modularity'
 	q_bp[i] = c.modularity(part, G, weight='weight')
@@ -87,20 +96,23 @@ for i,r in enumerate(res):
 	except:
 		continue
 
+
+
 # Plot modularity metric for different partitions at different resolution parameters.
-if False:
+if True:
 	plt.plot(res,q_bp,'b')
 	plt.plot(res,q_dend[0],'r')
 	plt.plot(res,q_dend[1],'g')
 	plt.plot(res,q_dend[2],'k')
 	plt.xlabel('Resolution')
-	plt.ylabel('modularity')
+	plt.ylabel('modularity (Q)')
+	plt.title('Global Trade Network Partitioning Quality')
 	plt.legend(['best partition','dendrogram0','dendrogram1a','dendrogram1b'])
 	plt.show()
 
 
 # Plot coverage metric
-if True:
+if False:
 	plt.plot(res,coverage,'b')
 	plt.xlabel('Resolution')
 	plt.ylabel('Coverage')

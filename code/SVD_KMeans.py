@@ -339,7 +339,7 @@ for y in years:
 	if flg_cluster_kmeans:
 
 		for ki,k in enumerate(numClust):
-			for di, d in enumerate(nDims):
+			for di,d in enumerate(nDims):
 		
 				print(ki,di)
 				print('Compute Kmeans on SVDs')	
