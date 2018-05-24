@@ -29,54 +29,57 @@ getcontext().prec = 3  # later used for adjusting alpha in scatter plot
 ## (0). Check what Operating System you are on (either my machine or Cortex cluster) and adjust directory structure accordingly.
 dirPre = dm.set_dir_tree()
 
-for file_year in np.arange(2005, 2015):
+for file_year in np.arange(1962, 2015):
 	try:
 	    year = np.array(file_year)
 	    flg_sym = True
 	    trade_ntwrkG = nm.construct_ntwrkX_Graph(dirPre=dirPre, year=year, flg_sym=flg_sym)
 	    giant = max(nx.connected_component_subgraphs(trade_ntwrkG), key=len)
-	    # out_deg = len(list(G)) - len(giant)
 	except:
-	    pass
+		continue
 
+	#	a) generate partitions of network, count, and sort partitions in decreasing order.
 
 	part = c.best_partition(trade_ntwrkG, partition=None, weight='weight', resolution=res, randomize=False)
 	res_counts = Counter(part.values())
 	res_order = sorted(res_counts, key=lambda i: int(res_counts[i]), reverse=True)
-	partition_sizes = Counter(res_counts.values())
-	# lg_clust = [key for key, val in res_counts.items() if val == max(list(res_counts.values()))][0]
+
+	#	b) create dicts and sets of nodes in clusters of interest.
+
 	dc_nodes = set([node for node in trade_ntwrkG.nodes() if node not in list(giant)])
+
 	clust_node_dict = {str(res_order[idx]):[key for key,val in part.items() if
 						val == res_order[idx]] for idx in np.arange(len(res_order))
 						if res_counts[res_order[idx]] > 1}
+
 	ones_clusters = set([key for key,val in res_counts.items() if val == 1])
 	ones_nodes = set([key for key,val in part.items() if val in ones_clusters])
-	# extract node attributes for plotting
-	LatLon = nx.get_node_attributes(trade_ntwrkG,'LatLon')            # these output dicts containing tuples of [(key, value)].
-	# continent = nx.get_node_attributes(trade_ntwrkG,'continent')
-	# countryId3 = nx.get_node_attributes(trade_ntwrkG,'countryId3')
-	# countryName = nx.get_node_attributes(trade_ntwrkG,'countryName')
-	# exports = nx.get_node_attributes(trade_ntwrkG,'exports')
-	# imports = nx.get_node_attributes(trade_ntwrkG,'imports')
 
-	num_clusters = len(partition_sizes)
+
+	#	c) extract node attributes for plotting
+	LatLon = nx.get_node_attributes(trade_ntwrkG,'LatLon')            # these output dicts containing tuples of [(key, value)].
+
+	#	d) map node attributes to dicts/sets
+
+	num_clusters = len(clust_node_dict.keys())
 	ones_LatLon = np.array([val for key, val in LatLon.items() if key in ones_nodes])
 	clust_LatLon = {k:np.array([val for key, val in LatLon.items() if key in v]) for k,v in clust_node_dict.items()}
 	dc_LatLon = np.array([val for key,val in LatLon.items() if key in dc_nodes])
 
-	# inc = Decimal(0.2)
-	# alpha = Decimal(0.9)
-	# alphas = {}
-	# colors = list(plt.rcParams['axes.prop_cycle'])
-	# print(colors)
-	colors = ['g','r','m','b','c']
+	#	e) generate colors and lables for plotting
+
+	colors = ['r', 'm','b', 'g', 'c']
 	color_dict = {}
 	label_dict = {}
-	for idx in res_order[:num_clusters-1]:
-		color_dict[str(idx)] = colors[idx]
-		label_dict[str(idx)] = str(len(clust_node_dict[str(idx)])) + ' nodes'
-	# print(clust_node_dict.keys())
-	# print(res_order[:num_clusters-1], num_clusters)
+	for idx, clust in enumerate(res_order[:num_clusters]):
+		color_dict[str(clust)] = colors[idx]
+		label_dict[str(clust)] = str(len(clust_node_dict[str(clust)])) + ' nodes'
+
+	# Flag as True to print cluster keys, and their order by size
+	if False:
+		print(clust_node_dict.keys())
+		print(res_order[:num_clusters], num_clusters)
+
 
 # #------------------------------------------------------------------------------------------------------------
 # (5). Plot and save figure of graph in networkX (with nodes in relative geographic location,
@@ -94,11 +97,11 @@ for file_year in np.arange(2005, 2015):
 	plt.xlim(-180, +180)
 	plt.ylim(-90,+90)
 	plt.legend(loc='best')
-	plt.show()
+	# plt.show()
 
 
 #
 #
-	# figG.savefig(str( '../out_figures/GTN_clust_maps/' + str(file_year) + '_clust_map.png' ), bbox_inches='tight')
+	figG.savefig(str( '../out_figures/GTN_clust_maps/' + str(file_year) + '_clust_map.png' ), bbox_inches='tight')
 #
 	plt.close(figG)
