@@ -3,11 +3,6 @@ import numpy as np
 import pandas as pd
 import pickle
 
-#import matplotlib
-#import matplotlib.pyplot as plt
-#import matplotlib.gridspec as gridspec
-#from mpl_toolkits import axes_grid1
-
 
 
 def set_dir_tree():
@@ -115,7 +110,7 @@ def construct_adjacency_from_year_origin_destination_csv(dirIn, dirOut, fileTag,
 
 
 
-def load_adjacency_npz_year(dirIn, year, num_countries, flg_sym):
+def load_adjacency_npz_year(dirIn, year, num_countries, sym):
 	## (5). Load a previously saved adjacency matrix files:
 	loaded = np.load(str(dirIn + 'adjacency_ntwrk_' + str(year) + '_' + str(num_countries) + 'countries.npz'))
 	trade_ntwrk = loaded['netwrk']
@@ -131,7 +126,7 @@ def load_adjacency_npz_year(dirIn, year, num_countries, flg_sym):
 	exports[self_weights] = exports[self_weights] - trade_ntwrk.diagonal()[self_weights] 
 	trade_ntwrk[ (self_weights,self_weights) ] = 0
 	#
-	if flg_sym:
+	if (sym=='sym'):
 		trade_ntwrk = (trade_ntwrk + trade_ntwrk.T) / 2
 		IE_avg  = (imports + exports) / 2
 		imports = IE_avg
@@ -148,10 +143,10 @@ def load_adjacency_npz_year(dirIn, year, num_countries, flg_sym):
 # -------------------------------- # -------------------------------- # --------------------------------
 
 
-def load_modularity_npz_year(dirIn, year, num_countries):
+def load_modularity_npz_year(dirIn, year, num_countries, sym):
 	## (6). Load a previously saved modularity matrix files:
-	loaded = np.load(str(dirIn + 'modularity_ntwrk_' + str(year) + '_' + str(num_countries) + 'countries.npz'))
-	trade_ntwrkA = loaded['netwrk']
+	loaded = np.load(str(dirIn + sym + 'modularity_ntwrk_' + str(year) + '_' + str(num_countries) + 'countries.npz'))
+	trade_ntwrkA = loaded['arr_0'] # loaded['netwrk']
 	loaded.close()
 
 	return trade_ntwrkA

@@ -26,7 +26,7 @@ flg_plot_1st3_SVDs			= True
 
 flg_cluster_DBSCAN			= False
 flg_cluster_agglomerative	= False
-flg_cluster_kmeans			= False
+flg_cluster_kmeans			= True
 
 flg_symmetric_network = True # Network is made undirected if true. Otherwise it is naturally directed or has asymmetric adjacency matrix.
 
