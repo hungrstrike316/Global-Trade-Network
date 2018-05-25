@@ -9,6 +9,9 @@ import utils.network_manipulation as nm
 # loaded from an .npz file. It will save the graph object as a .gpickle file. It will also save output 
 # figures of the Adjacency Matrix, and the network overlayed on a map.
 
+sym = 'sym' # 'sym' if undirected or '' if directed.
+
+
 #------------------------------------------------------------------------------------------------------------
 ## (0). Check what Operating System you are on (either my machine or Cortex cluster) and adjust directory structure accordingly.
 dirPre = dm.set_dir_tree()
@@ -20,9 +23,6 @@ num_countries = countries.shape[0]
 
 ### Loop over each year
 years = range(1962,2015)
-
-flg_sym = False
-
 # For each year: Each trade network from years 1962 - 2014.
 for year in years:
 	print(str(year))
