@@ -169,9 +169,28 @@ def networkX_modularity(adj_graph,sym,weight='weight'):
 
     return B
 
+# -------------------------------- # --------------------------------
 
-# -------------------------------- # -------------------------------- # --------------------------------
 
+def convert_adjacency_to_giant_component(G, adjacency):
+    giant = max(nx.connected_components(G), key=len)
+    giant = list(giant)
+    selected_columns = adjacency[:, giant]
+    selected_columns_and_rows = selected_columns.T[:, giant].T
+    return selected_columns_and_rows
+
+# -------------------------------- # --------------------------------
+
+
+def adjacency_matrix_from_graph(g):
+    """Returns the adjacency matrix of a networkx graph
+    Args:
+        g (networkx.classes.graph.Graph): NetworkX graph
+    Returns:
+        numpy.ndarray: The adjacency matrix of g
+    """
+    a = nx.adjacency_matrix(g, nodelist=sorted(g.nodes()), weight='weight')
+    return np.array(a.todense())
 
 
 def xyz(adj):
