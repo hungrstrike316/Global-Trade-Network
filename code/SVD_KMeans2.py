@@ -123,12 +123,12 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
     """
 
     Args:
-        year:
-        method:
-        quality_measure:
-        numClustList:
-        nDimsList:
-        flg_sym:
+        year (int): e.g 2006
+        method (str): "Adjacency" or "Laplacian"
+        quality_measure (str): "modularity" or "density" or "conductance"
+        numClustList (list): e.g [2, 3, 5, 7, 10, 15]
+        nDimsList (list): e.g [3, 5, 10, 20, 35, 50, 100, 150, 200]
+        flg_sym (bool): True or False
 
     Returns:
         numpy.ndarray
@@ -149,12 +149,13 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
     """
 
     Args:
-        quality_matrix:
-        quality:
-        numClustList:
-        nDimList:
-        year:
-        name:
+        quality_matrix (numpy.ndarray): Matrix of shape
+                                        len(numClustList) X len(nDimList)
+        quality (str): "modularity" or "density" or "conductance"
+        numClustList (list): e.g [2, 3, 5, 7, 10, 15]
+        nDimList (list): e.g [3, 5, 10, 20, 35, 50, 100, 150, 200]
+        year (int): e.g 2006
+        name: name of the image. For example, "density_2006.png"
 
     Returns:
         -
@@ -167,6 +168,7 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
     for k in range(len(numClustList)):
         plt.plot(nDimList, quality_matrix[k, :],
                  label="K = " + str(numClustList[k]))
+        plt.scatter(nDimList, quality_matrix[k, :])
     plt.legend(loc=1)
     plt.savefig("../out_figures/cluster_quality_measures/" + name)
     plt.clf()
