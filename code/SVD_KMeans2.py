@@ -6,6 +6,7 @@ import sklearn.cluster as skc
 import utils.data_manipulation as dm
 import utils.network_manipulation as nm
 import qualities as cq
+from matplotlib.font_manager import FontProperties
 
 
 class Kmeans:
@@ -210,6 +211,7 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
         -
 
     """
+
     plt.grid()
     plt.xlabel("Dims")
     plt.ylabel("Quality Measure")
@@ -219,7 +221,8 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
         plt.plot(nDimList, quality_matrix[k, :],
                  label="K = " + str(numClustList[k]))
         plt.scatter(nDimList, quality_matrix[k, :])
-    plt.legend(loc=1)
+    plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
+    plt.tight_layout()
     plt.savefig("../out_figures/cluster_quality_measures/" + name)
     plt.clf()
 
