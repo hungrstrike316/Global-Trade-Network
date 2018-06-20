@@ -29,7 +29,7 @@ file_name = 'laplacian_ntwrkX_'
 title = 'Laplacian'
 if normalized:
 	file_name = 'normalized_laplacian_ntwrkX_'
-	title = 'Normalied Laplacian'
+	title = 'Undirected Normalied Laplacian'
 	norm = 'norm'
 	sym = 'sym'
 if directed:
@@ -130,6 +130,6 @@ for year in range(1962,1963):
 
 		plt.title( title + " network in " + str(year), fontsize=szfont )
 		plt.show()
-		# fig.savefig(str( dirPre + 'out_figures/laplacian_scatter_plots/' + title + str(year) + '_threeEigVecs.png' ),bbox_inches='tight')
+		fig.savefig(str( dirPre + 'out_figures/laplacian_scatter_plots/' + title + str(year) + '_threeEigVecs.png' ),bbox_inches='tight')
 		# plt.show()
 		plt.close(fig)
