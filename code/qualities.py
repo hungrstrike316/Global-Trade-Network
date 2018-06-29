@@ -80,17 +80,20 @@ def conductance(g, clusters):
     edges = g.edges
     for cluster in clusters:
         cut_size = 0
-        total_degrees = 0
+        total_degree_0 = 0
+        total_degree_1 = 0
         flag = False  # Checks to see if we find any connections or not
         for edge in edges:
-            edge_0, edge_1 = edge[0], edge[1]
-            if edge_0 in cluster and edge_1 not in cluster:
+            node_0, node_1 = edge[0], edge[1]
+            if node_0 in cluster and node_1 not in cluster:
                 flag = True
-                cut_size += g.get_edge_data(edge_0, edge_1)['weight']
-                total_degrees += g.degree(edge_0, 'weight')
+                cut_size += g.get_edge_data(node_0, node_1)['weight']
+                total_degree_0 += g.degree(node_0, 'weight')
+                total_degree_1 += g.degree(node_1, 'weight')
         if not flag:
             continue
-        measure += cut_size / total_degrees
+        min_total_degrees = min(total_degree_0, total_degree_1)
+        measure += cut_size / min_total_degrees
     return measure
 
 # -----------------------------------------------------------------------------
@@ -115,11 +118,11 @@ def density(g, clusters):
         weighted_external = 0
         n_c = len(cluster)
         for edge in edges:
-            edge_0, edge_1 = edge[0], edge[1]
-            if edge_0 in cluster and edge_1 in cluster:
-                weighted_internal += g.get_edge_data(edge_0, edge_1)['weight']
-            if edge_0 in cluster and edge_1 not in cluster:
-                weighted_external += g.get_edge_data(edge_0, edge_1)['weight']
+            node_0, node_1 = edge[0], edge[1]
+            if node_0 in cluster and node_1 in cluster:
+                weighted_internal += g.get_edge_data(node_0, node_1)['weight']
+            if node_0 in cluster and node_1 not in cluster:
+                weighted_external += g.get_edge_data(node_0, node_1)['weight']
         if n == n_c:
             return 0
         density_external = weighted_external / (n_c * (n - n_c))
