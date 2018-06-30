@@ -113,21 +113,33 @@ def density(g, clusters):
     measure = 0
     edges = g.edges
     n = g.number_of_nodes()
+
+    # vectors for testing
+    n_c_vec = [] #
+    weighted_internal_vec = [] #
+    weighted_external_vec = [] #
+    density_internal_vec = [] #
+    density_external_vec = [] #
     for cluster in clusters:
         weighted_internal = 0
         weighted_external = 0
         n_c = len(cluster)
+        n_c_vec.append(n_c) #
+        if n == n_c:
+            return 0
         for edge in edges:
             node_0, node_1 = edge[0], edge[1]
             if node_0 in cluster and node_1 in cluster:
+                weighted_internal_vec.append(weighted_internal) #
                 weighted_internal += g.get_edge_data(node_0, node_1)['weight']
             if node_0 in cluster and node_1 not in cluster:
+                weighted_external_vec.append(weighted_external) #
                 weighted_external += g.get_edge_data(node_0, node_1)['weight']
-        if n == n_c:
-            return 0
         density_external = weighted_external / (n_c * (n - n_c))
+        density_external_vec.append(density_external) #
         if n_c is 1:
             return -density_external
         density_internal = weighted_internal / ((n_c * (n_c - 1)) / 2)
+        density_internal_vec.append(density_internal) #
         measure += density_internal - density_external
     return measure
