@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
-normalized = True
+normalized = False
 directed = False
 flg_plot_1st3_Eigs = True
 sym = 'sym' # 'sym' if undirected or '' if directed.
@@ -92,44 +92,44 @@ for year in range(1962,1963):
 	Wi, Vi = np.linalg.eig(lap_ntwkX)
 	# if directed:
 		# Vi = Vi.A
-
-	if flg_plot_1st3_Eigs:
-
-		fig=plt.figure(figsize=(8,8))
-		ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
-
-		for i in range(0,7):
-			indx = node_colors_by_continent==i
-			ax.scatter(Vi[0][indx], Vi[1][indx], Vi[2][indx], s=150, edgecolor='k', c=colors[i], alpha=0.4)
-		# ax.scatter(Vi[0], Vi[1], Vi[2]) #s=150, edgecolor='k', c=colors[0])# alpha=0.4)
-
-
-		lims=1
-		ax.set_xlim(-lims,lims)
-		ax.set_ylim(-lims,lims)
-		ax.set_zlim(-lims,lims)
-
-		# gt=0.1
-		# for i,cname in countriesLL.name.iteritems():
-		#  i = np.int(i)
-		 # if i<num_countries:
-			#  if np.any([np.abs(Vi[0][i])>gt, np.abs(Vi[1][i])>gt, np.abs(Vi[2][i])>gt]):
-			# 	 #print( str( cname + " " + str(Vi[0][i])  + " " +  str(Vi[1][i]) ) + " " +  str(Vi[2][i]) )
-			# 	 ax.text( Vi[0][i]+0.03, Vi[1][i]+0.03, Vi[2][i]+0.03, cname )
-
-		szfont = 24
-		ax.set_xlabel( '1st Eig', fontsize=szfont )
-		ax.set_ylabel( '2nd Eig', fontsize=szfont  )
-		ax.set_zlabel( '3rd Eig', fontsize=szfont  )
-
-		x = np.linspace(-lims,lims,2)
-
-		ax.plot(x, 0*x, 0*x, color='k' )
-		ax.plot(0*x, x, 0*x, color='k' )
-		ax.plot(0*x, 0*x, x, color='k' )
-
-		plt.title( title + " network in " + str(year), fontsize=szfont )
-		plt.show()
-		fig.savefig(str( dirPre + 'out_figures/laplacian_scatter_plots/' + title + str(year) + '_threeEigVecs.png' ),bbox_inches='tight')
-		# plt.show()
-		plt.close(fig)
+	#
+	# if flg_plot_1st3_Eigs:
+	#
+	# 	fig=plt.figure(figsize=(8,8))
+	# 	ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
+	#
+	# 	for i in range(0,7):
+	# 		indx = node_colors_by_continent==i
+	# 		ax.scatter(Vi[0][indx], Vi[1][indx], Vi[2][indx], s=150, edgecolor='k', c=colors[i], alpha=0.4)
+	# 	# ax.scatter(Vi[0], Vi[1], Vi[2]) #s=150, edgecolor='k', c=colors[0])# alpha=0.4)
+	#
+	#
+	# 	lims=1
+	# 	ax.set_xlim(-lims,lims)
+	# 	ax.set_ylim(-lims,lims)
+	# 	ax.set_zlim(-lims,lims)
+	#
+	# 	# gt=0.1
+	# 	# for i,cname in countriesLL.name.iteritems():
+	# 	#  i = np.int(i)
+	# 	 # if i<num_countries:
+	# 		#  if np.any([np.abs(Vi[0][i])>gt, np.abs(Vi[1][i])>gt, np.abs(Vi[2][i])>gt]):
+	# 		# 	 #print( str( cname + " " + str(Vi[0][i])  + " " +  str(Vi[1][i]) ) + " " +  str(Vi[2][i]) )
+	# 		# 	 ax.text( Vi[0][i]+0.03, Vi[1][i]+0.03, Vi[2][i]+0.03, cname )
+	#
+	# 	szfont = 24
+	# 	ax.set_xlabel( '1st Eig', fontsize=szfont )
+	# 	ax.set_ylabel( '2nd Eig', fontsize=szfont  )
+	# 	ax.set_zlabel( '3rd Eig', fontsize=szfont  )
+	#
+	# 	x = np.linspace(-lims,lims,2)
+	#
+	# 	ax.plot(x, 0*x, 0*x, color='k' )
+	# 	ax.plot(0*x, x, 0*x, color='k' )
+	# 	ax.plot(0*x, 0*x, x, color='k' )
+	#
+	# 	plt.title( title + " network in " + str(year), fontsize=szfont )
+	# 	plt.show()
+	# 	fig.savefig(str( dirPre + 'out_figures/laplacian_scatter_plots/' + title + str(year) + '_threeEigVecs.png' ),bbox_inches='tight')
+	# 	# plt.show()
+	# 	plt.close(fig)
