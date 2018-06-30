@@ -29,8 +29,12 @@ class Clustering:
                              axis=0) == self.imports), 'Imports are Weird'
         assert np.any(np.sum(self.trade_ntwrk_graph,
                              axis=1) == self.exports), 'Exports are Weird'
-        self.trade_ntwrk = nm.construct_ntwrk_method(self.trade_ntwrk_graph,
-                                                     method)
+        if method is "Laplacian":
+            self.trade_ntwrk = nm.networkX_laplacian(self.G, self.flg_sym,
+                                                     "norm")
+        else:
+            self.trade_ntwrk = nm.construct_ntwrk_method(self.trade_ntwrk_graph,
+                                                         method)
         self.labels = None
 
     def svd(self):
