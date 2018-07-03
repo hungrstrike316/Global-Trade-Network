@@ -15,7 +15,7 @@ class Clustering:
         dirPre)  # country names & ids and Lat,Lon information.
     num_countries = countriesLL.shape[0]
 
-    def __init__(self, year, method, flg_sym):
+    def __init__(self, year, method, flg_sym, norm="norm"):
         self.year = year
         if flg_sym:
             self.flg_sym = 'sym'
@@ -31,7 +31,7 @@ class Clustering:
                              axis=1) == self.exports), 'Exports are Weird'
         if method is "Laplacian":
             self.trade_ntwrk = nm.networkX_laplacian(self.G, self.flg_sym,
-                                                     "norm")
+                                                     norm)
         else:
             self.trade_ntwrk = nm.construct_ntwrk_method(self.trade_ntwrk_graph,
                                                          method)
@@ -178,7 +178,7 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
             cluster_object.kmeans(k, d, Vi)
             labels = get_labels(cluster_object, quality_measure, k)
             quality = cluster_object.cluster_quality_measure(quality_measure,
-                                                            labels)
+                                                             labels)
             quality_gather[ki][di] = quality
     return quality_gather
 
@@ -226,12 +226,14 @@ def kmeans_multiple_quality_matrix(year, method, qualities_list,
     return quality_gathers
 
 
-def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
+def quality_plot(quality_matrix, method, quality, numClustList, nDimList, year,
+                 name):
     """
 
     Args:
         quality_matrix (numpy.ndarray): Matrix of shape
                                         len(numClustList) X len(nDimList)
+        method (str): "Adjacency" or "Laplacian"
         quality (str): "modularity" or "density" or "conductance"
         numClustList (list): e.g [2, 3, 5, 7, 10, 15, "best_partition]
         nDimList (list): e.g [3, 5, 10, 20, 35, 50, 100, 150, 200]
@@ -246,8 +248,8 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
     plt.grid()
     plt.xlabel("Dims")
     plt.ylabel("Quality Measure")
-    plt.title(quality + " (weighted) Measure, Symmetric, Adjacency, Year " +
-              str(year), y=1.04)
+    plt.title(quality + " (weighted) Measure, Symmetric, " + method +
+              ", Year " + str(year), y=1.04)
     for k in range(len(numClustList)):
         plt.plot(nDimList, quality_matrix[k, :],
                  label="K = " + str(numClustList[k]))
@@ -258,9 +260,9 @@ def quality_plot(quality_matrix, quality, numClustList, nDimList, year, name):
     plt.clf()
 
 
-def multiple_qualities_plot(quality_matrices, qualities_list, numClustList,
-                            nDimList, year, name):
+def multiple_qualities_plot(quality_matrices, method, qualities_list,
+                            numClustList, nDimList, year, name):
     for quality_index in range(len(qualities_list)):
-        quality_plot(quality_matrices[quality_index],
+        quality_plot(quality_matrices[quality_index], method,
                      qualities_list[quality_index], numClustList, nDimList,
                      year, name + "_" + qualities_list[quality_index] + ".png")

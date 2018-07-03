@@ -1,4 +1,5 @@
 import numpy as np
+import networkx as nx
 
 
 def is_symmetric(adjacency):
@@ -115,31 +116,48 @@ def density(g, clusters):
     n = g.number_of_nodes()
 
     # vectors for testing
-    n_c_vec = [] #
-    weighted_internal_vec = [] #
-    weighted_external_vec = [] #
-    density_internal_vec = [] #
-    density_external_vec = [] #
+    n_c_vec = []  #
+    weighted_internal_vec = []  #
+    weighted_external_vec = []  #
+    density_internal_vec = []  #
+    density_external_vec = []  #
+    if len(clusters) is 1:
+        return 0
     for cluster in clusters:
         weighted_internal = 0
         weighted_external = 0
         n_c = len(cluster)
-        n_c_vec.append(n_c) #
-        if n == n_c:
-            return 0
+        n_c_vec.append(n_c)  #
         for edge in edges:
             node_0, node_1 = edge[0], edge[1]
             if node_0 in cluster and node_1 in cluster:
-                weighted_internal_vec.append(weighted_internal) #
                 weighted_internal += g.get_edge_data(node_0, node_1)['weight']
             if node_0 in cluster and node_1 not in cluster:
-                weighted_external_vec.append(weighted_external) #
                 weighted_external += g.get_edge_data(node_0, node_1)['weight']
+        if not nx.is_directed(g):
+            # If g is symmetric, repeat the for loop above with the nodes
+            # reversed so that we cover both directions.
+            for edge in edges:
+                node_0, node_1 = edge[1], edge[0]  # NOTICE: node_0 is edge[1]
+                if node_0 in cluster and node_1 in cluster:
+                    weighted_internal += g.get_edge_data(node_0, node_1)[
+                        'weight']
+                if node_0 in cluster and node_1 not in cluster:
+                    weighted_external += g.get_edge_data(node_0, node_1)[
+                        'weight']
+        weighted_internal_vec.append(weighted_internal)  #
+        weighted_external_vec.append(weighted_external)  #
         density_external = weighted_external / (n_c * (n - n_c))
-        density_external_vec.append(density_external) #
-        if n_c is 1:
-            return -density_external
-        density_internal = weighted_internal / ((n_c * (n_c - 1)) / 2)
-        density_internal_vec.append(density_internal) #
+        density_external_vec.append(density_external)  #
+        if n_c > 1:
+            density_internal = weighted_internal / ((n_c * (n_c - 1)) / 2)
+        else:
+            density_internal = 0
+        density_internal_vec.append(density_internal)  #
         measure += density_internal - density_external
+    n_c_vec = np.array(n_c_vec)
+    weighted_internal_vec = np.array(weighted_internal_vec)
+    weighted_external_vec = np.array(weighted_external_vec)
+    density_internal_vec = np.array(density_internal_vec)
+    density_external_vec = np.array(density_external_vec)
     return measure
