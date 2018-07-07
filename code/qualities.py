@@ -156,6 +156,7 @@ def density(g, clusters):
         density_internal_vec.append(density_internal)  #
         measure += density_internal - density_external
     n_c_vec = np.array(n_c_vec)
+    # print(n_c_vec)
     weighted_internal_vec = np.array(weighted_internal_vec)
     weighted_external_vec = np.array(weighted_external_vec)
     density_internal_vec = np.array(density_internal_vec)

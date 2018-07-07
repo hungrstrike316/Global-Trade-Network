@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import networkx as nx
 import community as c
@@ -154,6 +156,22 @@ def get_labels(cluster_object, quality_measure, numClust):
         return cluster_object.reformat_kmLabels_nx(numClust)
 
 
+def clusters_sizes(clusters):
+    """
+
+    Args:
+        clusters (list): List of sets.
+
+    Returns:
+        list
+
+    """
+    n_c_list = []
+    for cluster in clusters:
+        n_c_list.append(len(cluster))
+    return n_c_list
+
+
 def kmeans_quality_matrix(year, method, quality_measure, numClustList,
                           nDimsList, flg_sym):
     """
@@ -171,16 +189,20 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
 
     """
     quality_gather = np.zeros((len(numClustList), len(nDimsList)))
+    clusters_gather = dict()
     cluster_object = Clustering(year, method, flg_sym)
     Vi = cluster_object.svd()[2]
     for ki, k in enumerate(numClustList):
         for di, d in enumerate(nDimsList):
             cluster_object.kmeans(k, d, Vi)
             labels = get_labels(cluster_object, quality_measure, k)
+
             quality = cluster_object.cluster_quality_measure(quality_measure,
                                                              labels)
+            cluster_sizes = clusters_sizes(labels)
+            clusters_gather[(ki, di)] = cluster_sizes
             quality_gather[ki][di] = quality
-    return quality_gather
+    return quality_gather, clusters_gather
 
 
 def kmeans_multiple_quality_matrix(year, method, qualities_list,
@@ -226,6 +248,38 @@ def kmeans_multiple_quality_matrix(year, method, qualities_list,
     return quality_gathers
 
 
+def kmeans_cluster_size_visualization(quality_matrix, clusters_gather,
+                                      method, quality, numClustList, nDimList,
+                                      year, name):
+    print(clusters_gather)
+    for ki in range(len(numClustList)):
+        x = []
+        y = []
+        for di in range(len(nDimList)):
+            cluster_sizes = clusters_gather[(ki, di)]
+            for i in range(len(cluster_sizes)):
+                x.append(nDimList[di])
+                y.append(cluster_sizes[i])
+
+        plt.title("HELLO")
+        f, axarr = plt.subplots(2, 1)
+        h = axarr[0].hist2d(x, y, bins=20)
+        axarr[0].grid()
+        axarr[0].set_xticks(nDimList)
+        f.colorbar(h[3], ax=axarr[0])
+
+        axarr[1].grid()
+        axarr[1].set_xlabel("Dims")
+        axarr[1].set_ylabel("quality Measure")
+        axarr[1].set_title(quality + " (weighted) Measure, Symmetric, " + method +
+              ", Year " + str(year))
+
+        axarr[1].plot(nDimList, quality_matrix[ki, :])
+        plt.tight_layout()
+        plt.savefig("../out_figures/cluster_quality_measures/" + name + str(ki) + ".png")
+        plt.clf()
+
+
 def quality_plot(quality_matrix, method, quality, numClustList, nDimList, year,
                  name):
     """
@@ -256,6 +310,20 @@ def quality_plot(quality_matrix, method, quality, numClustList, nDimList, year,
         plt.scatter(nDimList, quality_matrix[k, :])
     plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
     plt.tight_layout()
+    plt.savefig("../out_figures/cluster_quality_measures/" + name)
+    plt.clf()
+
+
+def quality_plot_with_clusters(quality_matrix, clusters_list, method, quality,
+                               numClustList, nDimList, year, name):
+    zeros = np.zeros_like(nDimList)
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_zlim(0.0, 261.0)
+    for k in range(len(numClustList)):
+        ax.plot(nDimList,quality_matrix[k, :], zeros, label="K = " + str(numClustList[k]))
+        ax.scatter(nDimList, quality_matrix[k, :], zeros)
+    ax.legend(loc="upper left")
     plt.savefig("../out_figures/cluster_quality_measures/" + name)
     plt.clf()
 
