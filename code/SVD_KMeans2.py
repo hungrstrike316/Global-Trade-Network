@@ -172,6 +172,15 @@ def clusters_sizes(clusters):
     return n_c_list
 
 
+def count_item_frequency(list, item):
+    count = 0
+    for i in list:
+        if i == item:
+            count += 1
+    return count
+
+
+
 def kmeans_quality_matrix(year, method, quality_measure, numClustList,
                           nDimsList, flg_sym):
     """
@@ -248,7 +257,7 @@ def kmeans_multiple_quality_matrix(year, method, qualities_list,
     return quality_gathers
 
 
-def kmeans_cluster_size_visualization(quality_matrix, clusters_gather,
+def kmeans_cluster_size_visualization_2d_hist(quality_matrix, clusters_gather,
                                       method, quality, numClustList, nDimList,
                                       year, name):
     print(clusters_gather)
@@ -268,6 +277,37 @@ def kmeans_cluster_size_visualization(quality_matrix, clusters_gather,
         axarr[0].set_xticks(nDimList)
         f.colorbar(h[3], ax=axarr[0])
 
+        axarr[1].grid()
+        axarr[1].set_xlabel("Dims")
+        axarr[1].set_ylabel("quality Measure")
+        axarr[1].set_title(quality + " (weighted) Measure, Symmetric, " + method +
+              ", Year " + str(year))
+
+        axarr[1].plot(nDimList, quality_matrix[ki, :])
+        plt.tight_layout()
+        plt.savefig("../out_figures/cluster_quality_measures/" + name + str(ki) + ".png")
+        plt.clf()
+
+
+def cluster_visualizer(quality_matrix, clusters_gather,
+                                      method, quality, numClustList, nDimList,
+                                      year, name):
+    for ki in range(len(numClustList)):
+        f, axarr = plt.subplots(2, 1, figsize=(20, 10))
+        axarr[0].grid()
+        axarr[0].set_xticks(nDimList)
+        for di in range(len(nDimList)):
+            cluster_sizes = clusters_gather[(ki, di)]
+            for size in cluster_sizes:
+                size_frequency = count_item_frequency(cluster_sizes, size)
+                cm = plt.cm.get_cmap('Set1')
+                axarr[0].scatter([nDimList[di]], size, c=[size_frequency],
+                                 vmin=0, vmax=10, cmap=cm)
+        PCM = axarr[0].get_children()[2]
+        # plt.colorbar(PCM, cax=axarr[0])
+        f.colorbar(PCM, ax=axarr[0], orientation='horizontal')
+        # axarr[0].set_yticks(unique_sizes)
+        # plt.setp(axarr[0].get_yticklabels(), rotation=45, horizontalalignment='right')
         axarr[1].grid()
         axarr[1].set_xlabel("Dims")
         axarr[1].set_ylabel("quality Measure")
