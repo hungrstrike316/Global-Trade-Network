@@ -294,28 +294,35 @@ def cluster_visualizer(quality_matrix, clusters_gather,
                                       year, name):
     for ki in range(len(numClustList)):
         f, axarr = plt.subplots(2, 1, figsize=(20, 10))
+        f.suptitle(quality + " (weighted) Measure, Symmetric, " + method +
+              ", Year " + str(year), fontsize=20)
         axarr[0].grid()
+        axarr[0].set_xlabel("Dims")
+        axarr[0].set_ylabel("Cluster Size")
         axarr[0].set_xticks(nDimList)
         for di in range(len(nDimList)):
             cluster_sizes = clusters_gather[(ki, di)]
             for size in cluster_sizes:
                 size_frequency = count_item_frequency(cluster_sizes, size)
-                cm = plt.cm.get_cmap('Set1')
-                axarr[0].scatter([nDimList[di]], size, c=[size_frequency],
-                                 vmin=0, vmax=10, cmap=cm)
+                cm = plt.cm.get_cmap('jet')
+                axarr[0].scatter([nDimList[di]], size, s = [80],
+                                 c=[size_frequency], vmin=0, vmax=10, cmap=cm)
         PCM = axarr[0].get_children()[2]
         # plt.colorbar(PCM, cax=axarr[0])
-        f.colorbar(PCM, ax=axarr[0], orientation='horizontal')
+        cb_ticks = np.arange(11)
+        f.colorbar(PCM, ax=axarr[0], orientation='horizontal', ticks=cb_ticks)
         # axarr[0].set_yticks(unique_sizes)
         # plt.setp(axarr[0].get_yticklabels(), rotation=45, horizontalalignment='right')
         axarr[1].grid()
         axarr[1].set_xlabel("Dims")
         axarr[1].set_ylabel("quality Measure")
-        axarr[1].set_title(quality + " (weighted) Measure, Symmetric, " + method +
-              ", Year " + str(year))
+        # axarr[1].set_title()
 
-        axarr[1].plot(nDimList, quality_matrix[ki, :])
+        axarr[1].plot(nDimList, quality_matrix[ki, :], linewidth=3.3)
+        s = np.full((len(nDimList)), 80)
+        axarr[1].scatter(nDimList, quality_matrix[ki, :], s=s)
         plt.tight_layout()
+        f.subplots_adjust(top=0.93)
         plt.savefig("../out_figures/cluster_quality_measures/" + name + str(ki) + ".png")
         plt.clf()
 
