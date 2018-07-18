@@ -24,6 +24,8 @@ class Clustering:
         else:
             self.flg_sym = ''
         self.G = nm.construct_ntwrkX_Graph(self.dirPre, self.year, self.flg_sym)
+        self.gcc = max(nx.connected_components(self.G), key=len)
+        self.num_gcc = len(self.gcc)
         self.trade_ntwrk_graph, self.imports, self.exports =\
             dm.load_adjacency_npz_year(self.dirIn, year, self.num_countries,
                                        self.flg_sym)
@@ -180,7 +182,6 @@ def count_item_frequency(list, item):
     return count
 
 
-
 def kmeans_quality_matrix(year, method, quality_measure, numClustList,
                           nDimsList, flg_sym):
     """
@@ -200,6 +201,8 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
     quality_gather = np.zeros((len(numClustList), len(nDimsList)))
     clusters_gather = dict()
     cluster_object = Clustering(year, method, flg_sym)
+    num_countries = cluster_object.num_countries
+    num_gcc = cluster_object.num_gcc
     Vi = cluster_object.svd()[2]
     for ki, k in enumerate(numClustList):
         for di, d in enumerate(nDimsList):
@@ -211,7 +214,22 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
             cluster_sizes = clusters_sizes(labels)
             clusters_gather[(ki, di)] = cluster_sizes
             quality_gather[ki][di] = quality
-    return quality_gather, clusters_gather
+    bp_quality, bp_labels = get_best_partition(year, method, quality_measure,
+                                               flg_sym)
+    bp_sizes = clusters_sizes(bp_labels)
+    bp_row = np.full((len(nDimsList)), bp_quality)
+    return quality_gather, clusters_gather, num_gcc, num_countries, bp_row,\
+           bp_sizes
+
+
+def get_best_partition(year, method, quality_measure, flg_sym):
+    cluster_object = Clustering(year, method, flg_sym)
+    cluster_object.best_partition()
+    k = max(cluster_object.labels) + 1
+    labels = get_labels(cluster_object, quality_measure, k)
+    quality = cluster_object.cluster_quality_measure(quality_measure,
+                                                     labels)
+    return quality, labels
 
 
 def kmeans_multiple_quality_matrix(year, method, qualities_list,
@@ -289,41 +307,53 @@ def kmeans_cluster_size_visualization_2d_hist(quality_matrix, clusters_gather,
         plt.clf()
 
 
-def cluster_visualizer(quality_matrix, clusters_gather,
-                                      method, quality, numClustList, nDimList,
-                                      year, name):
+def cluster_visualizer(quality_matrix, clusters_gather, num_gcc, num_countries,
+                       bp_row, bp_sizes, method, quality, numClustList,
+                       nDimList, year, name):
     for ki in range(len(numClustList)):
-        f, axarr = plt.subplots(2, 1, figsize=(20, 10))
-        f.suptitle(quality + " (weighted) Measure, Symmetric, " + method +
-              ", Year " + str(year), fontsize=20)
+        f, axarr = plt.subplots(2, 1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(20, 10))
+        f.suptitle("K: " + str(numClustList[ki]) + ", " + quality + \
+                   " (weighted) Measure, Symmetric, " + method + \
+                   ", Year " + str(year) + ", # GCC: " \
+                   + str(num_gcc) + "/" + str(num_countries), fontsize=20)
         axarr[0].grid()
+        cm = plt.cm.get_cmap('nipy_spectral')
         axarr[0].set_xlabel("Dims")
         axarr[0].set_ylabel("Cluster Size")
-        axarr[0].set_xticks(nDimList)
+        axarr[0].set_xticks([0] + nDimList)
+        # Plot for best partition
+        for size in bp_sizes:
+            size_frequency = count_item_frequency(bp_sizes, size)
+            axarr[0].scatter([0], size, s=[50], c=[size_frequency], vmin=0,
+                             vmax=15, cmap=cm)
         for di in range(len(nDimList)):
             cluster_sizes = clusters_gather[(ki, di)]
             for size in cluster_sizes:
                 size_frequency = count_item_frequency(cluster_sizes, size)
-                cm = plt.cm.get_cmap('jet')
-                axarr[0].scatter([nDimList[di]], size, s = [80],
-                                 c=[size_frequency], vmin=0, vmax=10, cmap=cm)
+                axarr[0].scatter([nDimList[di]], size, s = [50],
+                                 c=[size_frequency], vmin=0, vmax=15, cmap=cm)
         PCM = axarr[0].get_children()[2]
-        # plt.colorbar(PCM, cax=axarr[0])
-        cb_ticks = np.arange(11)
-        f.colorbar(PCM, ax=axarr[0], orientation='horizontal', ticks=cb_ticks)
+        ticks = np.arange(16)
+        f.colorbar(PCM, ax=axarr[0], orientation='horizontal',
+                   fraction=0.046, pad=0.04, ticks=ticks)
+
         # axarr[0].set_yticks(unique_sizes)
         # plt.setp(axarr[0].get_yticklabels(), rotation=45, horizontalalignment='right')
         axarr[1].grid()
         axarr[1].set_xlabel("Dims")
-        axarr[1].set_ylabel("quality Measure")
+        axarr[1].set_ylabel(quality)
         # axarr[1].set_title()
 
-        axarr[1].plot(nDimList, quality_matrix[ki, :], linewidth=3.3)
+        axarr[1].plot(nDimList, quality_matrix[ki, :], linewidth=3.3,
+                      label="K=" + str(numClustList[ki]))
         s = np.full((len(nDimList)), 80)
         axarr[1].scatter(nDimList, quality_matrix[ki, :], s=s)
+        axarr[1].plot(nDimList, bp_row, linewidth=3.3, label="Best Partition")
+        axarr[1].legend()
         plt.tight_layout()
         f.subplots_adjust(top=0.93)
-        plt.savefig("../out_figures/cluster_quality_measures/" + name + str(ki) + ".png")
+        plt.savefig("../out_figures/cluster_quality_measures/" + name + "_K=" \
+                    + str(numClustList[ki]) + ".png")
         plt.clf()
 
 
