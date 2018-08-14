@@ -17,7 +17,7 @@ class Clustering:
         dirPre)  # country names & ids and Lat,Lon information.
     num_countries = countriesLL.shape[0]
 
-    def __init__(self, year, method, flg_sym, norm="norm"):
+    def __init__(self, year, method, flg_sym, norm="norm", is_gcc=False):
         self.year = year
         if flg_sym:
             self.flg_sym = 'sym'
@@ -34,11 +34,15 @@ class Clustering:
         assert np.any(np.sum(self.trade_ntwrk_graph,
                              axis=1) == self.exports), 'Exports are Weird'
         if method is "Laplacian":
+            print('hi')
             self.trade_ntwrk = nm.networkX_laplacian(self.G, self.flg_sym,
                                                      norm)
         else:
             self.trade_ntwrk = nm.construct_ntwrk_method(self.trade_ntwrk_graph,
                                                          method)
+        if is_gcc:
+            self.trade_ntwrk = nm.convert_adjacency_to_giant_component(self.G,
+                                                                       self.trade_ntwrk)
         self.labels = None
 
     def svd(self):
@@ -51,6 +55,7 @@ class Clustering:
         """
         Ui, Si, Vi = np.linalg.svd(self.trade_ntwrk, full_matrices=True,
                                    compute_uv=True)
+        print(self.trade_ntwrk.shape)
         return Ui, Si, Vi
 
     def kmeans(self, numClust, nDims,  Vi):
@@ -182,6 +187,56 @@ def count_item_frequency(list, item):
     return count
 
 
+def calculate_import_export_average(g, clusters):
+    """
+    Args:
+        g (networkx.classes.graph.Graph): a NetworkX graph.
+        clusters (list): List of sets.
+
+    Returns:
+        list
+    """
+    from math import log
+    imports_list = []
+    exports_list = []
+    avg_list = []
+    edges = g.edges
+    for cluster in clusters:
+        imports = 0
+        exports = 0
+        avg = 0
+        for edge in edges:
+            node_0, node_1 = edge[0], edge[1]
+            if node_0 in cluster and node_1 not in cluster:
+                imports += g.get_edge_data(node_1, node_0)['weight']
+                exports += g.get_edge_data(node_0, node_1)['weight']
+        try:
+            avg = log((imports + exports) / 2)
+        except ValueError:
+            avg = 0
+        try:
+            imports = log(imports)
+        except ValueError:
+            imports = 0
+        try:
+            exports = log(exports)
+        except ValueError:
+            exports = 0
+        imports_list.append(imports)
+        exports_list.append(exports)
+        avg_list.append(avg)
+    return avg_list, imports_list, exports_list
+
+
+# def plot_cluster_size_vs_avg_import_export(g, clusters_gather):
+#     cluster_object = Clustering(year, method, flg_sym)
+#     Vi = cluster_object.svd()[2]
+#     for ki, k in enumerate(numClustList):
+#         for di, d in enumerate(nDimsList):
+#             cluster_object.kmeans(k, d, Vi)
+#             labels = get_labels(cluster_object, quality_measure, k)
+
+
 def kmeans_quality_matrix(year, method, quality_measure, numClustList,
                           nDimsList, flg_sym):
     """
@@ -200,6 +255,7 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
     """
     quality_gather = np.zeros((len(numClustList), len(nDimsList)))
     clusters_gather = dict()
+    avg_import_export_gather = dict()
     cluster_object = Clustering(year, method, flg_sym)
     num_countries = cluster_object.num_countries
     num_gcc = cluster_object.num_gcc
@@ -208,7 +264,9 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
         for di, d in enumerate(nDimsList):
             cluster_object.kmeans(k, d, Vi)
             labels = get_labels(cluster_object, quality_measure, k)
-
+            avg_import_export = calculate_import_export_average(cluster_object.G,
+                                                                labels)
+            avg_import_export_gather[(ki, di)] = avg_import_export[0]
             quality = cluster_object.cluster_quality_measure(quality_measure,
                                                              labels)
             cluster_sizes = clusters_sizes(labels)
@@ -218,8 +276,8 @@ def kmeans_quality_matrix(year, method, quality_measure, numClustList,
                                                flg_sym)
     bp_sizes = clusters_sizes(bp_labels)
     bp_row = np.full((len(nDimsList)), bp_quality)
-    return quality_gather, clusters_gather, num_gcc, num_countries, bp_row,\
-           bp_sizes
+    return quality_gather, clusters_gather, avg_import_export_gather, \
+           num_gcc, num_countries, bp_row, bp_sizes
 
 
 def get_best_partition(year, method, quality_measure, flg_sym):
@@ -307,41 +365,43 @@ def kmeans_cluster_size_visualization_2d_hist(quality_matrix, clusters_gather,
         plt.clf()
 
 
-def cluster_visualizer(quality_matrix, clusters_gather, num_gcc, num_countries,
-                       bp_row, bp_sizes, method, quality, numClustList,
-                       nDimList, year, name):
+def cluster_visualizer(quality_matrix, clusters_gather, avg_import_export_gather,
+                       num_gcc, num_countries, bp_row, bp_sizes, method,
+                       quality, numClustList, nDimList, year, name):
     for ki in range(len(numClustList)):
-        f, axarr = plt.subplots(2, 1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(20, 10))
+        f, axarr = plt.subplots(3, 1, figsize=(20, 10))
         f.suptitle("K: " + str(numClustList[ki]) + ", " + quality + \
                    " (weighted) Measure, Symmetric, " + method + \
                    ", Year " + str(year) + ", # GCC: " \
-                   + str(num_gcc) + "/" + str(num_countries), fontsize=20)
+                   + str(num_gcc) + "/" + str(num_countries) + \
+                   ", # Clusters in BP: " + str(len(bp_sizes)), fontsize=20)
         axarr[0].grid()
         cm = plt.cm.get_cmap('nipy_spectral')
         axarr[0].set_xlabel("Dims")
-        axarr[0].set_ylabel("Cluster Size")
+        axarr[0].set_ylabel("Cluster Size", size=20)
         axarr[0].set_xticks([0] + nDimList)
         # Plot for best partition
+        # print(bp_sizes)
         for size in bp_sizes:
             size_frequency = count_item_frequency(bp_sizes, size)
-            axarr[0].scatter([0], size, s=[50], c=[size_frequency], vmin=0,
-                             vmax=15, cmap=cm)
+            axarr[0].scatter([0], size, s=[150], c=[size_frequency], vmin=0,
+                             vmax=numClustList[ki], cmap=cm)
         for di in range(len(nDimList)):
             cluster_sizes = clusters_gather[(ki, di)]
             for size in cluster_sizes:
                 size_frequency = count_item_frequency(cluster_sizes, size)
-                axarr[0].scatter([nDimList[di]], size, s = [50],
-                                 c=[size_frequency], vmin=0, vmax=15, cmap=cm)
+                axarr[0].scatter([nDimList[di]], size, s = [150],
+                                 c=[size_frequency], vmin=0, vmax=numClustList[ki], cmap=cm)
         PCM = axarr[0].get_children()[2]
-        ticks = np.arange(16)
+        ticks = np.arange(numClustList[ki] + 1)
         f.colorbar(PCM, ax=axarr[0], orientation='horizontal',
                    fraction=0.046, pad=0.04, ticks=ticks)
 
         # axarr[0].set_yticks(unique_sizes)
         # plt.setp(axarr[0].get_yticklabels(), rotation=45, horizontalalignment='right')
         axarr[1].grid()
-        axarr[1].set_xlabel("Dims")
-        axarr[1].set_ylabel(quality)
+        axarr[1].set_xlabel("Dims", size=20)
+        axarr[1].set_ylabel(quality, size=20)
         # axarr[1].set_title()
 
         axarr[1].plot(nDimList, quality_matrix[ki, :], linewidth=3.3,
@@ -350,6 +410,18 @@ def cluster_visualizer(quality_matrix, clusters_gather, num_gcc, num_countries,
         axarr[1].scatter(nDimList, quality_matrix[ki, :], s=s)
         axarr[1].plot(nDimList, bp_row, linewidth=3.3, label="Best Partition")
         axarr[1].legend()
+
+        axarr[2].set_xlabel("Cluster Size", size=20)
+        axarr[2].set_ylabel("Average Import/Export", size=20)
+        for di in range(len(nDimList)):
+            cluster_sizes = clusters_gather[(ki, di)]
+
+            avg_import_export = avg_import_export_gather[(ki, di)]
+            print(avg_import_export)
+            print(cluster_sizes)
+            axarr[2].scatter(cluster_sizes, avg_import_export,
+                             label="Dim=" + str(nDimList[di]), s = [150])
+        axarr[2].legend()
         plt.tight_layout()
         f.subplots_adjust(top=0.93)
         plt.savefig("../out_figures/cluster_quality_measures/" + name + "_K=" \
@@ -411,3 +483,12 @@ def multiple_qualities_plot(quality_matrices, method, qualities_list,
         quality_plot(quality_matrices[quality_index], method,
                      qualities_list[quality_index], numClustList, nDimList,
                      year, name + "_" + qualities_list[quality_index] + ".png")
+
+
+quality_gather, clusters_gather, avg_import_export_gather, \
+num_gcc, num_countries, bp_row, bp_sizes =  kmeans_quality_matrix(2006, 'Laplacian', 'density', [2, 3, 5, 7, 10, 15],
+                      [3, 5, 10, 20, 35, 50, 100, 150, 200], True)
+
+cluster_visualizer(quality_gather, clusters_gather, avg_import_export_gather,
+                       num_gcc, num_countries, bp_row, bp_sizes, 'Laplacian',
+                       'density', [2, 3, 5, 7, 10, 15],  [3, 5, 10, 20, 35, 50, 100, 150, 200], 2006, 'regular_laplacian_density')
